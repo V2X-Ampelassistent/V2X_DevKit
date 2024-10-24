@@ -34,7 +34,7 @@ if __name__ == '__main__':
 		new_packet[IP].dst = sys.argv[2]
 	
 		# delete the packet checksum.
-		del new_packet[UDP].chksum
+		# del new_packet[UDP].chksum
 	
 		# print and send the new packet
 		print(new_packet)

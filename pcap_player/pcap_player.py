@@ -26,17 +26,25 @@ if __name__ == '__main__':
 		time.sleep(float(delay))
 		# Update the start time
 		start_time = float(packet.time)
-	
+		
+		print("old packet: ")
 		print(packet)
 	
 		# create a new packet with the payload of the old one.
 		new_packet = packet.payload
 		new_packet[IP].dst = sys.argv[2]
+		# new_packet[IP].dst = packet[IP].dst
 	
 		# delete the packet checksum.
-		# del new_packet[UDP].chksum
-	
+		try:
+			del new_packet[UDP].chksum
+			del new_packet[IP].chksum
+		except:
+			# Just skip it...
+			pass
+		
 		# print and send the new packet
+		print("new packet: ")
 		print(new_packet)
 		send(new_packet)
 

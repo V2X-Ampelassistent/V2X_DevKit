@@ -5,23 +5,27 @@ import re
 import sys
 
 def main():
-    # import file
-    file = open(sys.argv[1], mode='r', encoding = 'latin-1').read()
-    # remove header and footer from file, we do not need it.
-    if ';' in file:
-        header, definitions = file.split(';',1)
-    elif 'BEGIN' in file:
-        header, definitions = file.split('BEGIN',1)
-    definitions = definitions.lstrip()
-    definitions = definitions.rstrip('END \n')
-    # split the file into a list of strings, each containig the structure of what will 
-    # later be one message.
-    # get the ones with '{}'
-    regex = re.compile('(.*) ::= (.*){([\S\s]*?)}')
-    definitionsList = regex.findall(definitions)
-    # get the oneliners without '{}'
-    regex = re.compile('(\S*)\s*::=\s*([a-zA-Z][^{]*?)\n')
-    definitionsList = definitionsList + regex.findall(definitions)
+    # import files:
+    definitionsList = list()
+    for filepath in sys.argv[1:]:
+        # import file
+        file = open(filepath, mode='r', encoding = 'latin-1').read()
+        # remove header and footer from file, we do not need it.
+        if ';' in file:
+            header, definitions = file.split(';',1)
+        elif 'BEGIN' in file:
+            header, definitions = file.split('BEGIN',1)
+        definitions = definitions.lstrip()
+        definitions = definitions.rstrip('END \n')
+        # split the file into a list of strings, each containig the structure of what will 
+        # later be one message.
+        # get the ones with '{}'
+        regex = re.compile('(.*) ::= (.*){([\S\s]*?)}')
+        List = regex.findall(definitions)
+        definitionsList = definitionsList + List
+        # get the oneliners without '{}'
+        regex = re.compile('(\S*)\s*::=\s*([a-zA-Z][^{]*?)\n')
+        definitionsList = definitionsList + regex.findall(definitions)
     # create a List of Messages
     messagesList = list()
     # create a List of message types and types used for variables in the Message for
@@ -60,7 +64,7 @@ def main():
             pass
 
     # print some Statistics:
-    print('found Message types:')
+    print('found Message versions:')
     print(messagesTypesList)
     print('found var types:')
     print(varTypesList)
@@ -73,7 +77,9 @@ def main():
             if varType == msg.name:
                 found = True
         if not found:
-            unknown_types.append(varType)
+            regex = re.compile('-?[0-9]+')
+            if regex.match(varType) == None:
+                unknown_types.append(varType)
 
     print('unknown types:')
     print(unknown_types)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from message_class import message
+from msg_generator import msg_generator
 import re
 import sys
 
@@ -16,11 +17,10 @@ def main():
         elif 'BEGIN' in file:
             header, definitions = file.split('BEGIN',1)
         definitions = definitions.lstrip()
-        definitions = definitions.rstrip('END \n')
         # split the file into a list of strings, each containig the structure of what will 
         # later be one message.
         # get the ones with '{}'
-        regex = re.compile('(.*) ::= (.*){([\S\s]*?)}')
+        regex = re.compile('(.*)::=(.*){([\S\s]*?)}')
         List = regex.findall(definitions)
         definitionsList = definitionsList + List
         # get the oneliners without '{}'
@@ -71,11 +71,27 @@ def main():
 
     # compare the types defined with the types used.
     unknown_types = list()
+    msggen = msg_generator()
     for varType in varTypesList:
         found = False
         for msg in messagesList:
             if varType == msg.name:
                 found = True
+                break
+        if found:
+            continue
+        for type in msggen.knowntypes:
+            if varType == type:
+                found = True
+                break
+        if found:
+            continue
+        for type in msggen.convertibletypes:
+            if varType == type[0]:
+                found = True
+                break
+        if found:
+            continue
         if not found:
             regex = re.compile('-?[0-9]+')
             if regex.match(varType) == None:

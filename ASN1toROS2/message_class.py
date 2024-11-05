@@ -8,7 +8,7 @@ class message:
         if len(asn1definition) == 2:
             # get type and content out of asn1definition
             defstr = asn1definition[1].strip()
-            regex = re.compile('(BIT STRING|[a-zA-Z0-9]*)[\s]?(.*)?')
+            regex = re.compile('(BIT STRING|[a-zA-Z0-9]*?)[\(\s]?(.*)?')
             regout = regex.findall(defstr)
             self.type = regout[0][0].strip()
             self.content = regout[0][1].strip()
@@ -41,10 +41,14 @@ class message:
                 # individually.
                 for e in self.content:
                     e = e.strip()
-                    var = e.split()
+                    # remove part behind "("
+                    e = e.split('(')
+                    # split at space
+                    var = e[0].split()
                     if (len(var) < 2) and ('...' not in var[0]):
                         raise Exception('var length too short.')
                     elif (len(var) >= 2):
+                        var[1] = var[1].lstrip('[] 0-9')
                         self.varlist[var[0]] = var[1]
         else:
             raise Exception('Something is wrong' + str(asn1definition))

@@ -3,12 +3,16 @@ import re
 class message:
     def __init__(self, asn1definition):
         self.name = asn1definition[0].strip()
+        # in some cases, there might be curly braces at name type side.
+        if '{' in self.name:
+            self.name, self.something = self.name.split('{', 1)
+            self.name = self.name.strip()
         self.asn1def = asn1definition
         # disassemble the oneliners
         if len(asn1definition) == 2:
             # get type and content out of asn1definition
             defstr = asn1definition[1].strip()
-            regex = re.compile('(BIT STRING|[a-zA-Z0-9]*?)[\(\s]?(.*)?')
+            regex = re.compile('(BIT STRING|[a-zA-Z0-9]*)[\s]?(.*)?')
             regout = regex.findall(defstr)
             self.type = regout[0][0].strip()
             self.content = regout[0][1].strip()

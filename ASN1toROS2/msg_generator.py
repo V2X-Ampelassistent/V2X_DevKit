@@ -1,9 +1,9 @@
 
 class msg_generator:
 
-    convertibletypes = list((('IA5String', 'string'), ('UTF8String', 'string')))
+    convertibletypes = {"IA5String": 'string', "UTF8String": 'string', 'INTEGER': 'int64', 'BOOLEAN' : 'uint8' }
     
-    knowntypes = list(('SEQUENCE', 'SEQUENCEOF', 'CHOICE', 'INTEGER', 'BOOLEAN'))
+    knowntypes = list(('SEQUENCE', 'SEQUENCEOF', 'CHOICE', 'NULL', 'ABSENT'))
 
     def __init__(self):
         pass

@@ -20,7 +20,7 @@ def main():
         # split the file into a list of strings, each containig the structure of what will 
         # later be one message.
         # get the ones with '{}'
-        regex = re.compile('(.*)::=(.*){([\S\s]*?)}')
+        regex = re.compile('(.*)::=(.*)\{((([\S\s]*?)(\{[\S\s]*?\})*)*)\}')
         List = regex.findall(definitions)
         definitionsList = definitionsList + List
         # get the oneliners without '{}'
@@ -41,8 +41,14 @@ def main():
             print(definition)
             print('- converts to -')
             print('name   : ' + str(messagesList[len(messagesList)-1].name))
-            print('type   : ' + str(messagesList[len(messagesList)-1].type))
-            print('content: ' + str(messagesList[len(messagesList)-1].content))
+            try:
+                print('type   : ' + str(messagesList[len(messagesList)-1].type))
+            except:
+                pass
+            try:
+                print('content: ' + str(messagesList[len(messagesList)-1].content))
+            except:
+                pass
             try:
                 print('sequeof: ' + str(messagesList[len(messagesList)-1].sequenceof))
             except:
@@ -64,7 +70,7 @@ def main():
             pass
 
     # print some Statistics:
-    print('found Message versions:')
+    print('found Message types:')
     print(messagesTypesList)
     print('found var types:')
     print(varTypesList)
@@ -87,7 +93,7 @@ def main():
         if found:
             continue
         for type in msggen.convertibletypes:
-            if varType == type[0]:
+            if varType in type:
                 found = True
                 break
         if found:

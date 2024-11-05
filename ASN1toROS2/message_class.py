@@ -25,34 +25,27 @@ class message:
                 self.type = 'SEQUENCEOF'
                 self.sequenceof = regout[0][1].strip()
         # disassemble multi-line structures
-        elif len(asn1definition) == 3:
+        elif len(asn1definition) >= 3:
             # get type and content out of asn1definition
             self.type = asn1definition[1].strip()
-            self.content = asn1definition[2].strip().split(',')
+            # split content at every comma that is not inside of brackets:
+            self.content = re.split(',\s*(?![^()]*\))', asn1definition[2])
+
             # create varlist for later. it will contain the variable names and the type in a dictionary.
             self.varlist = dict()
-            # individual handling for different types
-            if (self.type == 'INTEGER') or (self.type == 'ENUMERATED') or (self.type == 'BIT STRING'):
-                # INTEGER, ENUMERATED and BIT STRING share the same general structure, but might later
-                # be handled individually.
-                for e in self.content:
-                    regex = re.compile('([0-9a-zA-Z]*) *\((.*?)\)' )
-                    regout = regex.findall(e)
-                    if regout:
-                        self.varlist[regout[0][0]] = regout[0][1]
-            elif (self.type == 'SEQUENCE') or (self.type == 'CHOICE'):
-                # SEQUENCE and CHOICE share the same general structure, but might later be handled
-                # individually.
-                for e in self.content:
-                    e = e.strip()
-                    # remove part behind "("
-                    e = e.split('(')
-                    # split at space
-                    var = e[0].split()
-                    if (len(var) < 2) and ('...' not in var[0]):
-                        raise Exception('var length too short.')
-                    elif (len(var) >= 2):
-                        var[1] = var[1].lstrip('[] 0-9')
-                        self.varlist[var[0]] = var[1]
-        else:
-            raise Exception('Something is wrong' + str(asn1definition))
+
+            # Output of regex will be:
+            _pos_variable = 0
+            _pos_of = 1
+            _pos_number = 2
+            _pos_implicit_explicit = 3
+            _pos_type = 4
+            _pos_trailer = 5
+
+            regex = re.compile('([-a-zA-Z0-9]+)\s+(OF\s)?\s*(\[[0-9]*\]\s+)?(EXPLICIT\s+|IMPLICIT\s+)?([-a-zA-Z0-9]+)?([\S\s]*)')
+            self.contents_list = list()
+            for e in self.content:
+                regout = regex.findall(e)
+                self.contents_list.append(regout)
+                if regout:
+                    self.varlist[regout[0][_pos_variable]] = regout[0][_pos_type]

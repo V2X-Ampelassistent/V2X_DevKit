@@ -31,12 +31,13 @@ def main():
     # create a List of message types and types used for variables in the Message for
     # analysing later.
     messagesTypesList = list()
+    messagesNamesList = list()
     varTypesList = list()
     # create an object of each definition.
     for definition in definitionsList:
         messagesList.append(message(definition))
         # Print some helpful information, uncomment the second if-line for filtering.
-        if True:
+        if False:
         #if messagesList[len(messagesList)-1].type == 'SEQUENCEOF':
             print(definition)
             print('- converts to -')
@@ -59,6 +60,7 @@ def main():
                 pass
             print('--')
         # Update the lists used for analysis.
+        messagesNamesList.append(messagesList[len(messagesList)-1].name)
         if messagesList[len(messagesList)-1].type not in messagesTypesList:
             messagesTypesList.append(messagesList[len(messagesList)-1].type)
         try:
@@ -70,6 +72,8 @@ def main():
             pass
 
     # print some Statistics:
+    print('found Messages:')
+    print(messagesNamesList)
     print('found Message types:')
     print(messagesTypesList)
     print('found var types:')
@@ -105,6 +109,8 @@ def main():
 
     print('unknown types:')
     print(unknown_types)
+
+    msggen.generate(messagesList)
 
 
 if __name__ == '__main__':

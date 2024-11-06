@@ -35,17 +35,17 @@ class message:
             self.varlist = dict()
 
             # Output of regex will be:
-            _pos_variable = 0
-            _pos_of = 1
-            _pos_number = 2
-            _pos_implicit_explicit = 3
-            _pos_type = 4
-            _pos_trailer = 5
+            self._pos_variable = 0
+            self._pos_of = 1
+            self._pos_number = 2
+            self._pos_implicit_explicit = 3
+            self._pos_type = 4
+            self._pos_trailer = 5
 
             regex = re.compile('([-a-zA-Z0-9]+)\s+(OF\s)?\s*(\[[0-9]*\]\s+)?(EXPLICIT\s+|IMPLICIT\s+)?([-a-zA-Z0-9]+)?([\S\s]*)')
-            self.contents_list = list()
+            self.contentsList = list()
             for e in self.content:
                 regout = regex.findall(e)
-                self.contents_list.append(regout)
+                self.contentsList.append(regout)
                 if regout:
-                    self.varlist[regout[0][_pos_variable]] = regout[0][_pos_type]
+                    self.varlist[regout[0][self._pos_variable]] = regout[0][self._pos_type]

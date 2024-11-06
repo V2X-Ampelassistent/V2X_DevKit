@@ -20,20 +20,27 @@ class msg_generator:
 
             # create contents:
             if (msg.type == 'SEQUENCE') or (msg.type == 'CHOICE'):
-                for idx, e in enumerate(msg.varlist):
-                    if e == 'COMPONENTS':
+                for e in msg.contentsList:
+                    if not e:
                         continue
-                    if msg.varlist[e] in self.convertibletypes:
-                        msgString = msgString + e + ' ' + self.convertibletypes[msg.varlist[e]] + '\n'
+                    e = e[0]
+                    if e[msg._pos_variable] == 'COMPONENTS':
                         continue
-                    if msg.varlist[e] == 'SEQUENCE':
-                        print(msg.contentsList[idx][0][msg._pos_trailer])
+                    # check if its a known type:
+                    if e[msg._pos_type] in self.convertibletypes:
+                        msgString = msgString + self.convertibletypes[e[msg._pos_type]] + ' ' + e[msg._pos_variable] + '\n'
+                        continue
+                    # 
+                    if e[msg._pos_type] == 'SEQUENCE':
                         regex = re.compile('(OF)(\s)+([-a-zA-Z0-9]*)')
-                        ofType = regex.findall(msg.contentsList[idx][0][msg._pos_trailer])
-                        print(ofType)
-                        msgString = msgString + e + '[] ' + ofType[0][2] + '\n'
+                        ofType = regex.findall(e[msg._pos_trailer])
+                        msgString = msgString + ofType[0][2] + '[] ' + e[msg._pos_variable] + '\n'
                         continue
-                    msgString = msgString + e + ' ' + msg.varlist[e] + '\n'
+                    msgString = msgString + e[msg._pos_variable] + ' ' + e[msg._pos_variable] + '\n'
+            elif (msg.type == 'SEQUENCEOF'):
+                msgString = msgString + msg.sequenceof + '[] ' + msg.name + '\n'
+            elif (msg.type == 'INTEGER'):
+                msgString = msgString + 'int ' + msg.name + '\n'
                         
             # create new file:
             try:

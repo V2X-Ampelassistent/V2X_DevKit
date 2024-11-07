@@ -5,7 +5,7 @@ class msg_generator:
 
     convertibletypes = {"IA5String": 'string', "UTF8String": 'string', 'INTEGER': 'int64', 'BOOLEAN' : 'uint8' }
     
-    knowntypes = list(('SEQUENCE', 'SEQUENCEOF', 'CHOICE', 'NULL', 'ABSENT'))
+    knowntypes = list(('SEQUENCE', 'SEQUENCEOF', 'CHOICE', 'NULL', 'ABSENT', 'ENUMERATED'))
 
     def __init__(self):
         pass
@@ -40,7 +40,24 @@ class msg_generator:
             elif (msg.type == 'SEQUENCEOF'):
                 msgString = msgString + msg.sequenceof + '[] ' + msg.name + '\n'
             elif (msg.type == 'INTEGER'):
-                msgString = msgString + 'int ' + msg.name + '\n'
+                msgString = msgString + 'int64 ' + msg.name + '\n'
+            elif (msg.type == 'IA5String') or (msg.type == 'UTF8String') or (msg.type == 'NumericString') or (msg.type == 'ENUMERATED'):
+                msgString = msgString + 'string ' + msg.name + '\n'
+            elif (msg.type == 'BOOLEAN'):
+                msgString = msgString + 'uint8 ' + msg.name + '\n'
+            elif (msg.type == 'BIT STRING'):
+                msgString = msgString + 'uint8[] ' + msg.name + '\n'
+            elif (msg.type == 'CLASS'):
+                # TBD
+                pass
+            elif (msg.type == 'OCTET'):
+                msgString = msgString + 'uint16[] ' + msg.name + '\n'
+            elif (msg.type == ''):
+                # TBD
+                pass
+            else:
+                # TBD: look for type in asndef
+                pass
                         
             # create new file:
             try:

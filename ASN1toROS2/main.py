@@ -2,6 +2,7 @@
 
 from message_class import message
 from msg_generator import msg_generator
+from python_generator import python_generator
 import re
 import sys
 
@@ -72,12 +73,12 @@ def main():
             pass
 
     # print some Statistics:
-    print('found Messages:')
-    print(messagesNamesList)
-    print('found Message types:')
-    print(messagesTypesList)
-    print('found var types:')
-    print(varTypesList)
+    # print('found Messages:')
+    # print(messagesNamesList)
+    # print('found Message types:')
+    # print(messagesTypesList)
+    # print('found var types:')
+    # print(varTypesList)
 
     # compare the types defined with the types used.
     unknown_types = list()
@@ -110,7 +111,9 @@ def main():
     print('unknown types:')
     print(unknown_types)
 
-    msggen.generate(messagesList)
+    pygen = python_generator()
+    pygen.generate(messagesList, 'MapData')
+    # msggen.generate(messagesList)
 
 
 if __name__ == '__main__':

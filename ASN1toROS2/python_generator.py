@@ -1,5 +1,6 @@
 from message_class import message
 from msg_generator import msg_generator, _msg_name_str, _msg_type_str
+import re
 
 class python_generator:
     def __init__(self):
@@ -22,6 +23,9 @@ class python_generator:
 
     def recursivecodegen(self, msgtogenerate):
         self.recursivecounter = self.recursivecounter + 1
+        # handle edge cases seperately:
+        if self.edgecasehandler(msgtogenerate):
+            return
         # find the message in the list of messages.
         mymessage = None
         for e in self.messages:
@@ -73,7 +77,43 @@ class python_generator:
                 todoList.append(callfunction.msg_name)
                 self.dentout()
         elif (mymessage.type == 'CHOICE'):
-            # TBD
+            self.add('chosendata = mydata[1]')
+            
+            for e in mymessage.contentsList:
+                if not e:
+                    continue
+                e = e[0]
+                callfunction = _function_name(e[mymessage._pos_type])
+                jsonvarname = _msg_name_str(e[mymessage._pos_variable])
+                # check if its a known type:
+                if e[mymessage._pos_type] in msg_generator.convertibletypes:
+                    self.add('if chosendata["' + e[mymessage._pos_variable] + '"]):')
+                    self.dentin()
+                    self.add('msg.' + jsonvarname + ' = chosendata.' + e[mymessage._pos_variable])
+                    self.dentout()
+                    continue
+                # Check if variable is a Sequence of:
+                if e[mymessage._pos_type] == 'SEQUENCE':
+                    # Find out of what the sequence is:
+                    regex = re.compile('(OF)(\s)+([-a-zA-Z0-9]*)')
+                    ofType = regex.findall(e[mymessage._pos_trailer])
+                    # Add the of type to the ToDo List.
+                    todoList.append(ofType[0][2])
+                    # start a for loop and iterate through the Sequence
+                    self.add('for e in mydata[0]:')
+                    self.dentin()
+                    self.add('if mydata[0][0] == "' + e[mymessage._pos_variable] + '":')
+                    self.dentin()
+                    self.add('msg.' + jsonvarname + '.append(' + _function_name.gen(ofType[0][2]) + '(chosendata))')
+                    self.dentout()
+                    self.dentout()
+                    continue
+                # Generic non-edge-case handling:
+                self.add('if mydata[0] == "' + e[mymessage._pos_variable] + '":')
+                self.dentin()
+                self.add('msg.' + jsonvarname + '.append(' + callfunction.function_name + '(chosendata))')
+                todoList.append(callfunction.msg_name)
+                self.dentout()
             pass
         elif (mymessage.type == 'SEQUENCEOF'):
             callfunction = _function_name(mymessage.sequenceof)
@@ -113,7 +153,7 @@ class python_generator:
             if e not in self.generatedfunctions:
                 self.recursivecodegen(e)
                 self.generatedfunctions.append(e)
-        print(mymessage.name)
+        # print(mymessage.name)
         return
 
     def add(self, tobeadded='', end='\n'):
@@ -133,6 +173,79 @@ class python_generator:
         else:
             print('Cannot dent out.')
             raise Exception()
+        
+    def edgecasehandler(self, msgtogenerate):
+        # Computed Lane: Generic Handler not reasonable.
+        if msgtogenerate == 'ComputedLane':
+            # create a newline
+            self.add()
+            # create the message function header
+            self.add('def ' + _function_name.gen(msgtogenerate) + '(mydata):')
+            self.dentin()
+            # add comments
+            self.add('# ' + msgtogenerate + ".msg")
+            self.add('# original asn1 type: SEQUENCE')
+            self.add()
+            # start with content:
+            self.add('msg = Computedlane()')
+            self.add('if mydata.get("referenceLaneId"):')
+            self.dentin()
+            self.add('msg.referencelaneid = JSONtoLaneID(mydata.get("referenceLaneId"))')
+            self.dentout()
+            self.add('if mydata.get("offsetXaxis"):')
+            self.dentin()
+            self.add('offx = mydata.get("offsetXaxis")')
+            self.add('if offx[1] == "DrivenLineOffsetSm":')
+            self.dentin()
+            self.add('msg.offsetxaxissmall.append(JSONtoLaneID(offx[1]))')
+            self.dentout()
+            self.add('elif offx[1] == "DrivenLineOffsetLg":')
+            self.dentin()
+            self.add('msg.offsetxaxislarge.append(JSONtoLaneID(offx[1]))')
+            self.dentout()
+            self.dentout()
+            self.add('if mydata.get("offsetYaxis"):')
+            self.dentin()
+            self.add('offy = mydata.get("offsetYaxis")')
+            self.add('if offy[1] == "DrivenLineOffsetSm":')
+            self.dentin()
+            self.add('msg.offsetyaxissmall.append(JSONtoLaneID(offx[1]))')
+            self.dentout()
+            self.add('elif offy[1] == "DrivenLineOffsetLg":')
+            self.dentin()
+            self.add('msg.offsetyaxislarge.append(JSONtoLaneID(offx[1]))')
+            self.dentout()
+            self.dentout()
+            self.add('if mydata.get("rotateXY"):')
+            self.dentin()
+            self.add('msg.rotatexy = JSONtoAngle(mydata.get("rotateXY"))')
+            self.dentout()
+            self.add('if mydata.get("scaleXaxis"):')
+            self.dentin()
+            self.add('msg.scalexaxis = JSONtoScale_B12(mydata.get("scaleXaxis"))')
+            self.dentout()
+            self.add('if mydata.get("scaleYaxis"):')
+            self.dentin()
+            self.add('msg.scaleyaxis = JSONtoScale_B12(mydata.get("scaleYaxis"))')
+            self.dentout()
+            self.add('if mydata.get("regional"):')
+            self.dentin()
+            self.add('msg.regional = JSONtoRegionalExtension(mydata.get("regional"))')
+            self.dentout()
+            # end of function
+            self.add()
+            self.add('return msg')
+            self.dentout()
+            
+            # recursive call:
+            todoList = list(('DrivenLineOffsetLg', 'DrivenLineOffsetSm', 'LaneID', 'Angle', 'Scale-B12', 'RegionalExtension'))
+            for e in todoList:
+                if e not in self.generatedfunctions:
+                    self.recursivecodegen(e)
+                    self.generatedfunctions.append(e)
+            return True
+        return False
+
 
 class _function_name:
     def __init__(self, functiontoname):

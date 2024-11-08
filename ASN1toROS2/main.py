@@ -111,9 +111,10 @@ def main():
     print('unknown types:')
     print(unknown_types)
 
-    pygen = python_generator()
+    msggen.generate(messagesList)
+    
+    pygen = python_generator(msggen)
     pygen.generate(messagesList, 'MapData')
-    # msggen.generate(messagesList)
 
 
 if __name__ == '__main__':

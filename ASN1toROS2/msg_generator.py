@@ -8,6 +8,7 @@ class msg_generator:
     knowntypes = list(('SEQUENCE', 'SEQUENCEOF', 'CHOICE', 'NULL', 'ABSENT', 'ENUMERATED'))
 
     def __init__(self):
+        self.failedBITSTRINGS = list()
         pass
 
     def generate(self, messages):
@@ -85,7 +86,17 @@ class msg_generator:
             elif (msg.type == 'BOOLEAN'):
                 msgString = msgString + 'uint8 ' + _msg_name_str(msg.name) + '\n'
             elif (msg.type == 'BIT STRING'):
-                msgString = msgString + 'uint8[] ' + _msg_name_str(msg.name) + '\n'
+                try:
+                    for e in msg.contentsList:
+                        if not e:
+                            continue
+                        e = e[0]
+                        msgString = msgString + 'uint8 ' + _msg_name_str(e[msg._pos_variable]) + '\n'
+                except AttributeError:
+                    print('Cannot disassemble BIT STRING:   ' + msg.name)
+                    msgString = msgString + 'uint8[] ' + _msg_name_str(msg.name) + '\n'
+                    self.failedBITSTRINGS.append(_msg_name_str(msg.name))
+
             elif (msg.type == 'CLASS'):
                 # TBD
                 pass

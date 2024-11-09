@@ -1,4 +1,21 @@
-# How to use the Docker Container
+# Docker Development Environment
+
+## How to build and run the Docker Container
+
+First, build the Docker:
+```bash
+docker build -t ros_ws .  
+```
+If you are using a Mac with Apple Chip, use ```docker build --platform linux/arm64/v8 -t ros_ws .  ``` instead.
+
+Second, create the Docker Container:
+```bash
+docker run -it -d --name ros_ws_01 ros_ws    
+```
+
+It is now recommended to attach to the Docker Container using VSCode.
+
+## How to use the Docker Container
 
 The Docker container will automatically set up the ROS workspace. In the ```/root``` Folder, there should be a Folder ```ROS_ws``` and a Folder ```V2X_DevKit```.
 

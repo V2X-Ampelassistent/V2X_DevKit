@@ -3,8 +3,7 @@
 Zum Weiterleiten der V2X Daten per UDP auf dem Cohda Device:
 
 ```bash
-ifconfig cw-mon-rxa up
-llc rcap --HdrLen 52 --Interface cw-mon-rxa --Meta --RemoteHost 192.168.101.121 --RemotePort 37008
+/opt/cohda/test/runtest_monitor.sh 180 192.168.1.1 target
 ```
 
 ### GPS Daten weiterleiten:
@@ -13,7 +12,11 @@ Zunächst muss auf dem NUC der Port geöffnet werden, dazu
 ```bash
 suco socat - UDP-Listen:37010,crlf
 ```
-aufrufen.
+aufrufen **oder** den GPS Publisher mit
+```bash
+ros2 run v2x_cohdatoros GPS_Publisher
+```
+starten.
 
 Auf dem Cohda-device können nun die GPS Daten per UDP weitergeleitet werden:
 ```bash
@@ -26,8 +29,7 @@ Ports am NUC zum empfangen der Daten:
 
 | Port  | Daten |
 |-------|-------|
-| 37008 |   rxa |
-| 37009 |   rxb |
+| 37008 |  DSRC |
 | 37010 |   GPS |
 
 ### Aufzeichnen der Daten:

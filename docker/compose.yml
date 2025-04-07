@@ -1,0 +1,65 @@
+services:
+  dsrc_publisher:
+    image: v2x_devkit:0.0.0
+    container_name: dsrc_publisher
+    volumes:
+      - ./entrypoints:/root/V2X_DevKit/docker/entrypoints
+    entrypoint: /root/V2X_DevKit/docker/entrypoints/dsrc_publisher.bash
+    networks:
+      - ros
+  gps_publisher:
+    image: v2x_devkit:0.0.0
+    container_name: gps_publisher
+    volumes:
+      - ./entrypoints:/root/V2X_DevKit/docker/entrypoints
+    entrypoint: /root/V2X_DevKit/docker/entrypoints/gps_publisher.bash
+    networks:
+      - ros
+  pcap_player:
+    image: v2x_devkit:0.0.0
+    container_name: pcap_player
+    volumes:
+      - ./entrypoints:/root/V2X_DevKit/docker/entrypoints
+      - ./pcap_recordings:/root/V2X_DevKit/docker/pcap_recordings
+    entrypoint: /root/V2X_DevKit/docker/entrypoints/pcap_player.bash
+    networks:
+      - ros
+    depends_on:
+      - dsrc_publisher
+  mapem_log:
+    image: v2x_devkit:0.0.0
+    container_name: mapem_log
+    volumes:
+      - ./entrypoints:/root/V2X_DevKit/docker/entrypoints
+    entrypoint: /root/V2X_DevKit/docker/entrypoints/mapem_log.bash
+    networks:
+      - ros
+    depends_on:
+      - dsrc_publisher
+  spatem_log:
+    image: v2x_devkit:0.0.0
+    container_name: spatem_log
+    volumes:
+      - ./entrypoints:/root/V2X_DevKit/docker/entrypoints
+    entrypoint: /root/V2X_DevKit/docker/entrypoints/spatem_log.bash
+    networks:
+      - ros
+    depends_on:
+      - dsrc_publisher
+  gps_log:
+    image: v2x_devkit:0.0.0
+    container_name: gps_log
+    volumes:
+      - ./entrypoints:/root/V2X_DevKit/docker/entrypoints
+    entrypoint: /root/V2X_DevKit/docker/entrypoints/gps_log.bash
+    networks:
+      - ros
+    depends_on:
+      - gps_publisher
+
+networks:
+  ros:
+    external: false
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
